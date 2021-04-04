@@ -1,0 +1,118 @@
+class Local #Creamos una clase "Local", donde vamos a guardar las ventas diarias
+
+    def initialize #En el constructor vamos a inicializar la lista donde vamos a guardar las ventas
+        @lista = Array.new
+    end
+
+    def lista #Getter para mostrar la lista de las ventas
+        @lista
+    end
+
+    def Agregar_venta(ventis) #Metodo para guardar las ventas en la lista
+        @lista.push(ventis)
+    end
+
+    def Ganancia_diaria(dia_g) #Metodo para calcular las ganancias diarias, que espera recibir un string con la fecha del dia a ver las ganancias
+        @ganancia = 0
+        for i in lista #Recorremos la lista
+            if(i.dia == dia_g) #Comprobamos que la fecha especificada concuerde con la de la venta
+                @ganancia += i.ganancia #En caso que asi sea, lo sumamos a ganancia
+            end
+        end
+        return @ganancia
+    end
+end
+
+class Prenda #Clase prenda, con los atributos generales de las 3 prendas a la venta
+    def initialize(prec, costo, est) #Creamos un constructor, que espera recibir el precio inicial, su coste y el estado de la prenda
+        @precio_nuevo = prec
+        @coste = costo
+        @estado = est
+    end
+
+    def estado #Getters de los tres atributos
+        @estado
+    end
+    def precio_nuevo
+        @precio_nuevo
+    end
+    def coste
+        @coste
+    end
+end
+
+class Saco < Prenda #No hay mucho que explicar, se crean tres clases "hijas" de Prenda. Serian utiles en caso de que haya un cambio en el calculo de los precios de una prenda especifica
+end
+
+class Pantalon < Prenda
+end
+
+class Camisa < Prenda
+end
+
+class Venta #Clase Venta, su principal funcion es calcular el total y la ganancia de las ventas
+    @pago = 0
+    @ganancia = 0
+    @dia
+
+    def dia #Getters de los atributos necesarios
+        @dia
+    end
+
+    def ganancia
+        @ganancia
+    end
+
+    def venta_efectivo(prenda, cant, dia_v) #Metodo para calcular el total en efectivo
+        @dia = dia_v
+        if(prenda.estado ==  "Nuevo") #En caso que la prenda sea nueva no hay cambios en la venta
+            @pago = prenda.precio_nuevo * cant
+        elsif(prenda.estado == "Promocion") #En caso que la prenda este en promoción, le hacemos un descuento del 25%
+            @pago = prenda.precio_nuevo * 0.75 * cant
+        else #En caso que la prenda este en liquidacion, le descontamos el 50%
+            @pago = prenda.precio_nuevo * 0.5 * cant
+        end
+        @ganancia = @pago-(prenda.coste * cant) #Calculamos la ganancia total de la venta
+    end
+
+    def venta_tarjeta(prenda, cant, cuotas, dia_v) #Metodo para calcular el total con tarjeta, el coeficiente fijo de cada cuota es un 5%
+        @dia = dia_v
+        if(prenda.estado ==  "Nuevo") #En caso que la prenda sea nueva no hay cambios en la venta
+            @pago = (prenda.precio_nuevo + cuotas * 0.05 * prenda.precio_nuevo + 0.01 * prenda.precio_nuevo) * cant
+        elsif(prenda.estado == "Promocion") #En caso que la prenda este en promoción, le hacemos un descuento del 25%
+            @pago = (prenda.precio_nuevo + cuotas * 0.05 * prenda.precio_nuevo + 0.01 * prenda.precio_nuevo) * cant * 0.75
+        else #En caso que la prenda este en liquidacion, le descontamos el 50%
+            @pago = (prenda.precio_nuevo + cuotas * 0.05 * prenda.precio_nuevo + 0.01 * prenda.precio_nuevo) * cant * 0.5
+        end
+        @ganancia = @pago-(prenda.coste * cant) #Calculamos la ganancia total de la venta
+    end
+end
+
+#Una vez definidas las clases, hacemos unas pruebas para ver si todo funciona correctamente
+
+Localsito = Local.new #Creamos una instancia de Local (Una sucursal)
+Saco_rojo = Saco.new(800, 500, "Nuevo") #Creamos una instancia para dos prendas
+Pantalon_jean = Pantalon.new(1000, 400, "Promocion")
+
+ventita = Venta.new #Creamos dos ventas, una para cada prenda y con la misma fecha
+ventita.venta_efectivo(Saco_rojo, 2, "23/02")
+venta2 = Venta.new
+venta2.venta_efectivo(Pantalon_jean, 1, "23/02")
+
+Localsito.Agregar_venta(ventita) #Agregamos las ventas a la lista de la sucursal
+Localsito.Agregar_venta(venta2)
+puts(Localsito.Ganancia_diaria("23/02")) #Mostramos las ganancias de ese dia
+
+
+#Creamos otro local para ver si funciona la venta con tarjeta
+
+Macowons = Local.new #Creamos una instancia de una nueva sucursal
+Camisa_negra = Camisa.new(2000, 500, "Liquidacion") #Creamos una instancia de una prenda
+
+venta_prueba = Venta.new #Creamos una venta
+venta_prueba.venta_tarjeta(Camisa_negra, 1, 3, "01/03")
+
+Macowons.Agregar_venta(venta_prueba) #La agregamos a la lista
+puts(Macowons.Ganancia_diaria("01/03")) #Mostramos la ganancia de ese dia
+
+#En caso de querer que las ventas se agreguen automaticamente a la lista, habria que hacer un formulario que al llenarlo y enviarlo agregue automaticamente esa venta en la lista
